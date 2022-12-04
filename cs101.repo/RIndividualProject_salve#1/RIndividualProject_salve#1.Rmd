@@ -1,0 +1,174 @@
+---
+title: "RIndividualProject_salve#1"
+author: "Ben Robert T. Salve."
+date: "2022-12-04"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Individual Project 1
+# Ben Robert T. Salve. BSIT2-A
+
+### Packages to be used.
+### Install and load packages.
+### install.packages('twitteR')
+### install.packages('rtweet')
+```{r}
+library ('twitteR')
+library ('dplyr')
+library('ggplot2')
+library('RColorBrewer')
+library('rtweet')
+library('wordcloud2')
+library('tm')
+```
+
+## Set-up credentials. 
+```{r}
+CONSUMER_SECRET <- "l2298Ok71DCuHhfAMTypI8A88fXM03NpLV7RoV01HpS53gXdxc"
+CONSUMER_KEY <- "uZQEmTPMqu0Zd15Qedgv95aW6"
+ACCESS_SECRET <- "CE4k2fUjJ0zQJqHRM0Q9SkFnSK2gPbb4FnZobXRmL6HnL"
+ACCESS_TOKEN <- "1595121466819084289-8XLqJsnGLYTv1xPV0m0PmC05B0v6zP"
+```
+
+## Connect to twitter.
+```{r}
+setup_twitter_oauth(consumer_key = CONSUMER_KEY, 
+                    consumer_secret = CONSUMER_SECRET,
+                    access_token = ACCESS_TOKEN,
+                    access_secret = ACCESS_SECRET)
+```
+
+## Changing global options because mine has 1k limit.
+```{r}
+options(max.print = 10000) 
+```
+
+## Collect twitter data.
+```{r}
+trends <- searchTwitter("#wednesdaynetflix -filter:retweets", n = 10000, lang = "en",
+                        since = "2022-11-16", until = "2022-11-30",
+                        retryOnRateLimit = 120)
+trends
+```
+
+## Data to data frame.
+```{r}
+trendsDF <- twListToDF(trends)
+```
+
+## View data.
+View(trendsDF)
+head(trendsDF, n= 5)
+names(trendsDF)
+class(trendsDF)
+data_text <- head(trendsDF$text)[1:5]
+data_text
+
+
+## Save and load data. 
+save(trendsDF,file= "trendsDF.Rdata")
+save(trends, file= "trends.Rdata")
+load(file= "trendsDF.Rdata")
+load(file= "trends")
+
+
+## Checking for missing values in a data frame.
+```{r}
+sapply(trendsDF, function(x) sum(is.na(x)))
+```
+
+## Subsetting.
+```{r}
+tweet_trends <- trendsDF %>% 
+  select(screenName, text, created, statusSource)
+```
+
+## Time series.
+```{r}
+ts_plot(tweet_trends, "hours") +
+  labs(x = NULL, y = NULL,
+       title = "Frequency of tweets with a #wednesdaynetflix",
+       subtitle = paste0(format(min(tweet_trends$created), "%d %B %Y"), " to ", 
+                         format(max(tweet_trends$created),"%d %B %Y")),
+       caption = "Data collected from Twitter's REST API via twitteR") +
+  theme_classic()
+```
+
+## Time series with legend.
+```{r}
+ggplot(data = trendsDF, aes(x = created)) + geom_histogram(aes(fill = ..count..)) +
+  xlab("Time") + ylab("Number of tweets") +
+  scale_fill_gradient(low = "blue", high = "purple") +
+  theme(legend.position = "left")
+```
+
+## Type of device found in source. 
+```{r}
+Gadgets <- function(x) {
+  if(grepl(">Twitter for iPhone</a>", x)){
+    "iphone"
+  }else if(grepl(">Twitter for iPad</a>", x)){
+    "ipad"
+  }else if(grepl(">Twitter for Android</a>", x)){
+    "android"
+  } else if(grepl(">Twitter Web Client</a>", x)){
+    "Web"
+  } else if(grepl(">Twitter for Windows Phone</a>", x)){
+    "windows phone"
+  }else if(grepl(">dlvr.it</a>", x)){
+    "dlvr.it"
+  }else if(grepl(">IFTTT</a>", x)){
+    "ifttt"
+  }else if(grepl(">Facebook</a>", x)){  
+    "facebook"
+  }else {
+    "others"
+  }
+}
+
+trendsDF$tweetSource = sapply(trendsDF$statusSource, Gadgets)
+
+trends_Source <- trendsDF %>% select(tweetSource) %>%
+group_by(tweetSource) %>% summarize(count=n()) %>%
+arrange(desc(count)) 
+
+device_Source <- subset(trends_Source, count >10)
+
+
+data_Source <- data.frame(category = trends_Source$tweetSource,
+                          count = trends_Source$count)
+
+data_Source$fraction = data_Source$count / sum(data_Source$count)
+data_Source$percentage = data_Source$count / sum(data_Source$count) * 100
+data_Source$ymax = cumsum(data_Source$fraction)
+data_Source$ymin = c(0, head(data_Source$ymax, n=-1))
+data_Source$roundP = round(data_Source$percentage, digits = 2)
+```
+
+## Type of device found in source plot. 
+```{r}
+Device_source <- paste(data_Source$category, data_Source$roundP, "%")
+ggplot(data_Source, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=Device_source)) +
+geom_rect() + coord_polar(theta="y") + xlim(c(2, 4)) + theme_void() +
+theme(legend.position = "left")
+```
+
+## Word cloud.
+```{r}
+screen_name <- trendsDF %>%
+  select(screenName) %>%
+  group_by(screenName) %>%
+  summarize(count=n()) %>%
+  arrange(desc(count)) 
+
+corpus_file <- Corpus(VectorSource(trendsDF$screenName))  
+class(trendsDF$screenName)
+
+wordcloud2(data=screen_name, size=2, color='random-light',
+           shape = 'star', backgroundColor="black")
+```
+
+
+
