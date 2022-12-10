@@ -1,0 +1,275 @@
+---
+title: "RWorksheet_salve#7"
+author: "Ben Robert T. Salve."
+date: "2022-12-10"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+# Worksheet 7
+# Ben Robert T. Salve. BSIT2-A
+
+## 1)
+```{r}
+Student<- seq(1:10)
+Pre_Test<- c(55, 54, 47, 57, 51, 61, 57, 54, 63, 58)
+Post_Test<- c(61, 60, 56, 63, 56, 63, 59, 56, 62, 61)
+
+df1 <- data.frame(Student, Pre_Test, Post_Test)
+df1
+```
+## a.
+```{r}
+library(Hmisc)
+library(pastecs)
+
+describe(df1)
+stat.desc(df1)
+```
+
+## 2)
+```{r}
+data1<- c(10, 10, 10, 20, 20, 50, 10, 20, 10, 50, 20, 50, 20, 10)
+data1
+```
+## a.
+```{r}
+factored_data<- factor(data1, ordered = TRUE)
+factored_data
+```
+## Answer: The output of the code displayed the levels of the factored_data object which are 
+## 10 is less than 20 and 20 is less than 50.
+
+
+## 3) 
+```{r}
+subjects<- c("l", "n", "n", "i", "l", "l", "n", "n", "i", "l")
+```
+## a.
+```{r}
+represent<- data.frame(subjects)
+represent
+```
+## Answer: The best way to represent this data in R is to make a data frame. 
+
+
+## 4)
+```{r}
+sample_accountants<- c("tas", "sa", "qld", "nsw", "nsw", "nt", "wa", "wa", "qld", "vic", "nsw", 
+                        "vic", "qld", "qld", "sa", "tas", "sa", "nt", "wa", "vic", "qld", "nsw",
+                        "nsw", "wa", "sa", "act", "nsw", "vic", "vic", "act")
+sample_accountants
+```
+## a.
+```{r}
+factored_sample_accountants<- factor(sample_accountants)
+factored_sample_accountants
+
+a4<- levels(factored_sample_accountants)
+a4
+```
+## Answer: The factor function displays everything inside the combine and displays the level,
+## it displayed the elements without repeating it. While the factor level it just displayed 
+## the levels.
+
+
+## 5)
+```{r}
+incomes<- c(60, 49, 40, 61, 64, 60, 59, 54, 62, 69, 70, 42, 56, 61, 61,
+             61, 58, 51, 48, 65, 49, 49, 41, 48, 52, 46, 59, 46, 58, 43)
+incomes
+```
+## a.
+```{r}
+income_apply<- tapply(incomes, sample_accountants, mean)
+income_apply 
+```
+## b.
+```{r}
+income_apply 
+```
+## Answer: It displayed the mean of the income for each sample_accountants. 
+
+
+## 6)
+```{r}
+stdError <- function(x) sqrt(var(x)/length(x))
+```
+## a.
+## Answer: The standard error describes the variation between the calculated mean of 
+## the population and one which is considered known, or accepted as accurate.
+```{r}
+std_error_n<- length(income_apply)
+std_error_sd<- sd(income_apply)
+std_error_se<- std_error_sd/sqrt(std_error_n)
+std_error_se
+```
+## b.
+## Answer: By dividing the sd(), sqrt(), or length() you will get the standard errors as result. 
+
+## 7)
+```{r}
+data(Titanic)
+#View(Titanic)
+titanic_dataset<- data.frame(Titanic)
+```
+## a.
+```{r}
+survived<- subset(titanic_dataset, Survived == "Yes")
+survived
+
+did_not_survived<- subset(titanic_dataset, Survived == "No")
+did_not_survived
+```
+
+## 8)
+## a.
+## Answer: The data sets pertain to Wisconsin's breast cancer. Periodically as Dr. Wolberg 
+## discusses his clinical cases, samples start to come. This chronological grouping of the 
+## data is therefore reflected in the database.
+
+## b.
+library(readxl)
+getwd()
+Breast_Cancer<- read_excel("Breast_Cancer.xlsx")
+View(Breast_Cancer)
+
+## c.
+## c1.
+## Code: 
+c1_n <- length(Breast_Cancer$`CL. thickness`)
+c1_sd <- sd(Breast_Cancer$`CL. thickness`)
+c1_se <- c1_sd/sqrt(Breast_Cancer$`CL. thickness`)
+c1_se
+## Output:
+## [1] 1.2812754 1.2812754 1.6541194 1.1696391 1.4325095 1.0129371 2.8650189 2.0258743 2.0258743 1.4325095
+## [11] 2.8650189 2.0258743 1.2812754 2.8650189 1.0129371 1.0828754 1.4325095 1.4325095 0.9059985 1.1696391
+## [21] 1.0828754 0.9059985 1.6541194 1.0129371 2.8650189 1.2812754 1.6541194 1.2812754 2.0258743 2.8650189
+## [31] 1.6541194 2.0258743 0.9059985 2.0258743 1.6541194 2.0258743 0.9059985 1.1696391 1.2812754 2.0258743
+## [41] 1.1696391 0.9059985 1.1696391 1.2812754 0.9059985 2.8650189 1.6541194 2.8650189 1.4325095
+
+## c2.
+## Code:
+c2<- sd(Breast_Cancer$`Marg. Adhesion`) / mean(Breast_Cancer$`Marg. Adhesion`) * 100
+c2
+## Output:
+## [1] 97.67235
+
+## c3.
+## Code:
+c3 <- subset(Breast_Cancer,`Bare. Nuclei` == "NA")
+c3
+## Output:
+##  A tibble: 2 × 11
+##  Id `CL. thickness` `Cell size` `Cell Shape` Marg. A…¹ Epith…² Bare.…³ Bl. C…⁴ Norma…⁵ Mitoses Class
+##  <dbl>           <dbl>       <dbl>        <dbl>     <dbl>   <dbl> <chr>     <dbl>   <dbl>   <dbl> <chr>
+##   1 1057013               8           4            5         1       2 NA            7       3       1 mali…
+##  2 1096800               6           6            6         9       6 NA            7       8       1 beni…
+##  … with abbreviated variable names ¹​`Marg. Adhesion`, ²​`Epith. C.size`, ³​`Bare. Nuclei`,
+##    ⁴​`Bl. Cromatin`, ⁵​`Normal nucleoli`
+
+## c4.
+## Code:
+c4<- mean(Breast_Cancer$`Bl. Cromatin`)
+c4.1<- sd(Breast_Cancer$`Bl. Cromatin`)
+c4
+## Output:
+## [1] 3.836735
+
+c4.1
+## Output:
+## [1] 2.085135
+
+## c5.
+## Mean.
+## Code:
+c5 <- mean(Breast_Cancer$`Cell Shape`)
+c5
+## Output:
+## [1] 3.163265
+
+## Standard error of the mean.
+## Code:
+c5.1 <- length(Breast_Cancer$`Cell Shape`)
+c5.2 <- sd(Breast_Cancer$`Cell Shape`)
+c5.3 <- c5.2/sqrt(c5.1)
+c5.3
+## Output:
+## [1] 0.4158294
+
+## Finding the t-score that corresponds to the confidence level.
+## Code:
+c5.4 = 0.05
+c5.5 = c5.1 - 1
+c5.6 = qt(p= c5.4/2, df= c5.5, lower.tail= F)
+c5.6
+## Output:
+## [1] 2.010635
+
+## Constructing the confidence interval.
+## Code:
+c5.7 <- c5.6* c5.3
+c5.7 
+## Output:
+## [1] 0.836081
+
+## Lower.
+## Code:
+c5.8 <- c5 - c5.7
+c5.8
+## Output:
+## [1] 2.327184
+
+## Upper.
+## Code:
+c5.9 <- c5 + c5.7
+
+c(c5.8, c5.9)
+## Output:
+## [1] 2.327184 3.999346
+
+## d.
+## Code:
+attributes(Breast_Cancer)
+## Output:
+## $names
+## [1] "Id"              "CL. thickness"   "Cell size"       "Cell Shape"      "Marg. Adhesion" 
+## [6] "Epith. C.size"   "Bare. Nuclei"    "Bl. Cromatin"    "Normal nucleoli" "Mitoses"        
+## [11] "Class"          
+
+## e.
+## Code:
+e8 <- subset(Breast_Cancer, Class == "malignant")
+e8
+## Output:
+##  A tibble: 1 × 11
+##  Id `CL. thickness` `Cell size` `Cell Shape` Marg. A…¹ Epith…² Bare.…³ Bl. C…⁴ Norma…⁵ Mitoses Class
+##  <dbl>           <dbl>       <dbl>        <dbl>     <dbl>   <dbl> <chr>     <dbl>   <dbl>   <dbl> <chr>
+##   1 1017122               8          10           10         8       7 10            9       7       1 mali…
+##  … with abbreviated variable names ¹​`Marg. Adhesion`, ²​`Epith. C.size`, ³​`Bare. Nuclei`,
+##    ⁴​`Bl. Cromatin`, ⁵​`Normal nucleoli`
+
+## Percentage.
+## Code:
+17  / 49 * 100
+## Output:
+## [1] 34.69388
+
+## Answer: There are 17 respondents who are malignant and 49 respondents. The result 
+## is that 34.69388 or 35% of respondents are malignant.
+
+
+## 9.
+## install.packages('AppliedPredictiveModeling')
+library("AppliedPredictiveModeling")
+data(abalone)
+View(abalone)
+head(abalone)
+summary(abalone)
+
+## install.packages('xlsx')
+library(xlsx)
+write.xlsx(abalone,"/Users/miasalve/Desktop/Home folder/ISAT-U files/BSIT 2-A/abalone.xlsx")
+
